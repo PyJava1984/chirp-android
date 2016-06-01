@@ -3,6 +3,7 @@ package com.arashpayan.chirp;
 import android.app.Application;
 import android.content.Context;
 import android.net.wifi.WifiManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.net.DatagramPacket;
@@ -10,6 +11,8 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Arash Payan (https://arashpayan.com) on 5/14/16.
@@ -24,12 +27,15 @@ public class Chirp {
     protected static final String TAG = "Chirp";
     private ScheduledExecutorService mExecutor;
     private WifiManager.MulticastLock mMulticastLock;
+    private static final Pattern sServiceNamePattern = Pattern.compile("[a-zA-Z0-9\\.\\-]+");
 
     public Chirp() {
 //        mExecutor = Executors.newSingleThreadScheduledExecutor();
         mExecutor = Executors.newScheduledThreadPool(2);
         System.out.println("you created a chirper");
     }
+
+    protected static Multicast
 
     public void listen(final Application app) {
         // acquire the lock
@@ -105,6 +111,24 @@ public class Chirp {
         } catch (Throwable t) {
             Log.w(TAG, "_listen6: ", t);
         }
+    }
+
+    public static boolean isValidServiceName(String name) {
+        if (TextUtils.isEmpty(name)) {
+            return false;
+        }
+
+        if (name.getBytes().length > 64) {
+            return false;
+        }
+
+        Matcher matcher = sServiceNamePattern.matcher(name);
+        return matcher.matches();
+
+    }
+
+    public static ChirpBrowser listenFor(String serviceName) {
+        return new ChirpBrowser(serviceName);
     }
 
 }
