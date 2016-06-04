@@ -1,16 +1,9 @@
 package com.arashpayan.chirp;
 
-import android.app.Application;
-import android.content.Context;
-import android.net.wifi.WifiManager;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
 
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.security.SecureRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,98 +12,29 @@ import java.util.regex.Pattern;
  */
 public class Chirp {
 
-    private static final String IPv4_GROUP = "224.0.0.224";
-    private static final String IPv6_GROUP = "[FF06::224]";
-    private static final int CHIRP_PORT = 6464;
-
     public static final int MAX_MSG_LENGTH = 64 * 1024;
-    protected static final String TAG = "Chirp";
-    private ScheduledExecutorService mExecutor;
-    private WifiManager.MulticastLock mMulticastLock;
     private static final Pattern sServiceNamePattern = Pattern.compile("[a-zA-Z0-9\\.\\-]+");
+    private static final SecureRandom sSecureRandom = new SecureRandom();
+    protected static final char[] sHexArray = "0123456789abcdef".toCharArray();
 
-    public Chirp() {
-//        mExecutor = Executors.newSingleThreadScheduledExecutor();
-        mExecutor = Executors.newScheduledThreadPool(2);
-        System.out.println("you created a chirper");
+    private Chirp() {
     }
 
-    protected static Multicast
-
-    public void listen(final Application app) {
-        // acquire the lock
-        WifiManager wifiMgr = (WifiManager) app.getSystemService(Context.WIFI_SERVICE);
-        mMulticastLock = wifiMgr.createMulticastLock("Chirp Multicast Lock");
-        mMulticastLock.setReferenceCounted(false);
-        mMulticastLock.acquire();
-
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    _listen();
-                } catch (Throwable t) {
-                    Log.w(TAG, "run: ", t);
-                }
-            }
-        });
-
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    _listen6();
-                } catch (Throwable t) {
-                    Log.w(TAG, "run6: ", t);
-                }
-            }
-        });
+    public static ChirpBrowser.Builder browseFor(@NonNull String serviceName) {
+        return new ChirpBrowser.Builder(serviceName);
     }
 
-    private void _listen() {
-        Log.i(TAG, "_listen: ");
-        try {
-            InetAddress addr = InetAddress.getByName(IPv4_GROUP);
-            MulticastSocket socket = new MulticastSocket(CHIRP_PORT);
-            socket.joinGroup(addr);
-            byte[] buf = new byte[MAX_MSG_LENGTH];
-            DatagramPacket packet = new DatagramPacket(buf, MAX_MSG_LENGTH);
-            while (true) {
-                Log.i(TAG, "_listen: waiting on a packet");
-                socket.receive(packet);
-                if (packet.getLength() == 0) {
-                    Log.i(TAG, "_listen: A 0 length packet?");
-                    continue;
-                }
-                String msg = new String(buf, 0, packet.getLength(), "utf-8");
-                Log.i(TAG, "msg: " + msg);
-            }
-        } catch (Throwable t) {
-            Log.w(TAG, "_listen: ", t);
+    protected static String getRandomId() {
+        byte[] randData = new byte[16];
+        sSecureRandom.nextBytes(randData);
+
+        char[] hexChars = new char[16 * 2];
+        for ( int j = 0; j < 16; j++ ) {
+            int v = randData[j] & 0xFF;
+            hexChars[j * 2] = sHexArray[v >>> 4];
+            hexChars[j * 2 + 1] = sHexArray[v & 0x0F];
         }
-    }
-
-    private void _listen6() {
-        Log.i(TAG, "_listen6: ");
-        try {
-            InetAddress addr = InetAddress.getByName(IPv6_GROUP);
-            MulticastSocket socket = new MulticastSocket(CHIRP_PORT);
-            socket.joinGroup(addr);
-            byte[] buf = new byte[MAX_MSG_LENGTH];
-            DatagramPacket packet = new DatagramPacket(buf, MAX_MSG_LENGTH);
-            while (true) {
-                Log.i(TAG, "_listen6: waiting on a packet");
-                socket.receive(packet);
-                if (packet.getLength() == 0) {
-                    Log.i(TAG, "_listen6: A 0 length packet?");
-                    continue;
-                }
-                String msg = new String(buf, 0, packet.getLength(), "utf-8");
-                Log.i(TAG, "msg6: " + msg);
-            }
-        } catch (Throwable t) {
-            Log.w(TAG, "_listen6: ", t);
-        }
+        return new String(hexChars);
     }
 
     public static boolean isValidServiceName(String name) {
@@ -124,11 +48,6 @@ public class Chirp {
 
         Matcher matcher = sServiceNamePattern.matcher(name);
         return matcher.matches();
-
-    }
-
-    public static ChirpBrowser listenFor(String serviceName) {
-        return new ChirpBrowser(serviceName);
     }
 
 }
