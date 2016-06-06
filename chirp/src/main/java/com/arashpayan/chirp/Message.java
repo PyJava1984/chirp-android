@@ -37,10 +37,10 @@ class Message {
         return ipAddress.contains(":");
     }
 
-    protected boolean isValid() {
+    protected ChirpError isValid() {
         // validate the sender id (should be 16 bytes, encoded as hexadecimal)
         if (!Chirp.isValidSenderId(senderId)) {
-            return false;
+            return new ChirpError("invalid 'sender_id'");
         }
 
         switch (type) {
@@ -48,23 +48,23 @@ class Message {
                 break;
             case MESSAGE_TYPE_PUBLISH:
                 if (!Chirp.isValidServiceName(serviceName)) {
-                    return false;
+                    return new ChirpError("invalid 'service_name'");
                 }
                 if (ttl < 10) {
-                    return false;
+                    return new ChirpError("invalid 'ttl'");
                 }
                 break;
             case MESSAGE_TYPE_REMOVE_SERVICE:
                 if (!Chirp.isValidServiceName(serviceName)) {
-                    return false;
+                    return new ChirpError("invalid 'service_name'");
                 }
                 break;
             default:
                 // unknown message type
-                return false;
+                return new ChirpError("unknown message type");
         }
 
-        return true;
+        return null;
     }
 
     protected void setAddress(InetAddress address) {
@@ -90,8 +90,10 @@ class Message {
                 break;
             case MESSAGE_TYPE_PUBLISH:
                 json.put("service_name", serviceName);
-                json.put("payload", payload);
                 json.put("ttl", ttl);
+                if (payload != null) {
+                    json.put("payload", payload);
+                }
                 break;
             case MESSAGE_TYPE_REMOVE_SERVICE:
                 json.put("service_name", serviceName);

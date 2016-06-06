@@ -5,6 +5,7 @@ import android.support.annotation.CheckResult;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -59,8 +60,13 @@ public class ChirpSocket {
         if (mReadPacket.getLength() == 0) {
             return null;
         }
-//        String str = new String(buf, 0, packet.getLength(), "utf-8");
-//        logi("msgstr: " + str);
+        String str = null;
+        try {
+            str = new String(mReadBuf, 0, mReadPacket.getLength(), "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        logi("msgstr: " + str);
         ByteArrayInputStream bais = new ByteArrayInputStream(mReadBuf, 0, mReadPacket.getLength());
         Message msg;
         try {
@@ -71,8 +77,9 @@ public class ChirpSocket {
             return null;
         }
 
-        if (!msg.isValid()) {
-            logi("returning null because message isn't valid");
+        ChirpError err = msg.isValid();
+        if (err != null) {
+            logi("returning null because message isn't valid: " + err);
             return null;
         }
 

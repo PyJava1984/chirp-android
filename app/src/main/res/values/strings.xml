@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">ChirpDemo</string>
+    <string name="app_name">Chirp Demo</string>
+    <string name="browsing_for_services_ellipsis">Browsing for services...</string>
 </resources>

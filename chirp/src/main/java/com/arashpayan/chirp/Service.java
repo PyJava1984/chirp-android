@@ -24,11 +24,11 @@ public class Service {
         publisherId = pubId;
     }
 
-    public String getIPv4() {
+    public String getIpv4() {
         return v4Ip;
     }
 
-    public String getIPv6() {
+    public String getIpv6() {
         return v6Ip;
     }
 
@@ -53,5 +53,21 @@ public class Service {
                 ", name='" + name + '\'' +
                 ", payload=" + payload +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Service service = (Service) o;
+
+        return publisherId.equals(service.publisherId);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return publisherId.hashCode();
     }
 }

@@ -1,0 +1,33 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable name="srvc" type="com.arashpayan.chirp.Service" />
+    </data>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/service_name"
+            tools:text="sh.ara.foo"
+            android:text="@{srvc.name}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/service_ipv4"
+            tools:text="192.168.1.1"
+            android:text="@{srvc.ipv4}"
+            android:layout_below="@id/service_name"
+            android:layout_alignParentStart="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/service_ipv6"
+            tools:text="fe80::2600:2291:334"
+            android:text="@{srvc.ipv6}"
+            android:gravity="end"
+            android:layout_below="@id/service_name"
+            android:layout_alignParentEnd="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+</layout>
