@@ -8,37 +8,39 @@ import android.util.Log;
 import com.arashpayan.chirp.Chirp;
 import com.arashpayan.chirp.ChirpBrowser;
 import com.arashpayan.chirp.ChirpBrowserListener;
+import com.arashpayan.chirp.ChirpPublisher;
 import com.arashpayan.chirp.Service;
 
 public class MainActivity extends AppCompatActivity implements ChirpBrowserListener {
 
     public static final String TAG = "ChirpDemo";
     private ChirpBrowser mChirpBrowser;
+    private ChirpPublisher mChirpPublisher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mChirpBrowser = Chirp.browseFor("*").
-                              listener(this).
-                              start(getApplication());
+//        mChirpBrowser = Chirp.browseFor("*").
+//                              listener(this).
+//                              start(getApplication());
+
+        mChirpPublisher = Chirp.publish("wqwq").
+                                start(getApplication());
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onDestroy() {
+        super.onDestroy();
 
-        if (!mChirpBrowser.isStarted()) {
-            mChirpBrowser.start(getApplication());
+        if (mChirpBrowser != null) {
+            mChirpBrowser.stop();
         }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        mChirpBrowser.stop();
+        if (mChirpPublisher != null) {
+            Log.i(TAG, "onDestroy: calling publisher stop");
+            mChirpPublisher.stop();
+        }
     }
 
     @Override

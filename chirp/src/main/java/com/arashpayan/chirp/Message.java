@@ -1,12 +1,10 @@
 package com.arashpayan.chirp;
 
 import android.support.annotation.StringDef;
-import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +22,6 @@ class Message {
     protected static final String QUEUE_POISON_PILL = "poison_pill";
 
     protected String ipAddress;
-    protected byte[] publisherPayload;
 
     @MessageType
     protected String type;
@@ -41,21 +38,33 @@ class Message {
     }
 
     protected boolean isValid() {
-        switch (type) {
-            case MESSAGE_TYPE_NEW_LISTENER:
-            case MESSAGE_TYPE_PUBLISH:
-            case MESSAGE_TYPE_REMOVE_SERVICE:
-                break;
-            default:
-                return false;
-        }
-
-        //noinspection SimplifiableIfStatement
-        if (TextUtils.isEmpty(senderId)) {
+        // validate the sender id (should be 16 bytes, encoded as hexadecimal)
+        if (!Chirp.isValidSenderId(senderId)) {
             return false;
         }
 
-        return Chirp.isValidServiceName(serviceName);
+        switch (type) {
+            case MESSAGE_TYPE_NEW_LISTENER:
+                break;
+            case MESSAGE_TYPE_PUBLISH:
+                if (!Chirp.isValidServiceName(serviceName)) {
+                    return false;
+                }
+                if (ttl < 10) {
+                    return false;
+                }
+                break;
+            case MESSAGE_TYPE_REMOVE_SERVICE:
+                if (!Chirp.isValidServiceName(serviceName)) {
+                    return false;
+                }
+                break;
+            default:
+                // unknown message type
+                return false;
+        }
+
+        return true;
     }
 
     protected void setAddress(InetAddress address) {
@@ -75,10 +84,17 @@ class Message {
     protected Map<String, Object> toMap() {
         HashMap<String, Object> json = new HashMap<>();
         json.put("type", type);
+        json.put("sender_id", senderId);
         switch (type) {
             case MESSAGE_TYPE_NEW_LISTENER:
-                json.put("sender_id", senderId);
                 break;
+            case MESSAGE_TYPE_PUBLISH:
+                json.put("service_name", serviceName);
+                json.put("payload", payload);
+                json.put("ttl", ttl);
+                break;
+            case MESSAGE_TYPE_REMOVE_SERVICE:
+                json.put("service_name", serviceName);
             default:
                 break;
         }
@@ -90,7 +106,6 @@ class Message {
     public String toString() {
         return "Message{" +
                 "ipAddress='" + ipAddress + '\'' +
-                ", publisherPayload=" + Arrays.toString(publisherPayload) +
                 ", type=" + type +
                 ", senderId='" + senderId + '\'' +
                 ", serviceName='" + serviceName + '\'' +

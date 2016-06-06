@@ -43,16 +43,19 @@ public class ChirpBrowser {
             mServiceName = serviceName;
         }
 
+        @SuppressWarnings("unused")
         public Builder listener(ChirpBrowserListener l) {
             mListener = l;
             return this;
         }
 
+        @SuppressWarnings("unused")
         public Builder looper(Handler h) {
             mHandler = h;
             return this;
         }
 
+        @SuppressWarnings("unused")
         public ChirpBrowser start(Application app) {
             ChirpBrowser cb = new ChirpBrowser(mServiceName);
             cb.setListener(mListener);
@@ -164,6 +167,7 @@ public class ChirpBrowser {
         notifyServiceRemoved(service);
     }
 
+    @SuppressWarnings("unused")
     public boolean isStarted() {
         return mIsStarted;
     }
@@ -242,7 +246,7 @@ public class ChirpBrowser {
         mMulticastLock.setReferenceCounted(false);
         mMulticastLock.acquire();
 
-        mExecutor = Executors.newScheduledThreadPool(3);
+        mExecutor = Executors.newCachedThreadPool();
         mIsStarted = true;
 
         if (mListenerHandler == null) {
@@ -289,8 +293,8 @@ public class ChirpBrowser {
         }
         logi("chirpbrowser.stop");
 
-        mExecutor.shutdownNow();
         mIsStarted = false;
+        mExecutor.shutdownNow();
         mSocket4.close();
         mSocket4 = null;
         mSocket6.close();
