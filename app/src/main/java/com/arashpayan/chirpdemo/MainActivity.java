@@ -43,8 +43,8 @@ public class MainActivity extends AppCompatActivity implements ChirpBrowserListe
                               listener(mAdapter).
                               start(getApplication());
 
-//        mChirpPublisher = Chirp.publish("wqwq").
-//                                start(getApplication());
+        mChirpPublisher = Chirp.publish("papa").
+                                start(getApplication());
     }
 
     @Override

@@ -60,13 +60,12 @@ public class ChirpSocket {
         if (mReadPacket.getLength() == 0) {
             return null;
         }
-        String str = null;
-        try {
-            str = new String(mReadBuf, 0, mReadPacket.getLength(), "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        logi("msgstr: " + str);
+//        String str = null;
+//        try {
+//            str = new String(mReadBuf, 0, mReadPacket.getLength(), "utf-8");
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
         ByteArrayInputStream bais = new ByteArrayInputStream(mReadBuf, 0, mReadPacket.getLength());
         Message msg;
         try {

@@ -176,6 +176,7 @@ public class ChirpBrowser {
         Message helloMsg = new Message();
         helloMsg.type = Message.MESSAGE_TYPE_NEW_LISTENER;
         helloMsg.senderId = mId;
+        helloMsg.serviceName = mServiceName;
         try {
             socket.send(helloMsg);
         } catch (Throwable t) {

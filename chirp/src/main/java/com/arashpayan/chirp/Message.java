@@ -1,6 +1,7 @@
 package com.arashpayan.chirp;
 
 import android.support.annotation.StringDef;
+import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -42,9 +43,18 @@ class Message {
         if (!Chirp.isValidSenderId(senderId)) {
             return new ChirpError("invalid 'sender_id'");
         }
+        if (TextUtils.isEmpty(serviceName)) {
+            return new ChirpError("'service_name' is missing");
+        }
 
         switch (type) {
             case MESSAGE_TYPE_NEW_LISTENER:
+                // wildcard is acceptable for listeners
+                if (!serviceName.equals("*")) {
+                    if (!Chirp.isValidServiceName(serviceName)) {
+                        return new ChirpError("invalid 'service_name");
+                    }
+                }
                 break;
             case MESSAGE_TYPE_PUBLISH:
                 if (!Chirp.isValidServiceName(serviceName)) {
@@ -85,6 +95,7 @@ class Message {
         HashMap<String, Object> json = new HashMap<>();
         json.put("type", type);
         json.put("sender_id", senderId);
+        json.put("service_name", serviceName);
         switch (type) {
             case MESSAGE_TYPE_NEW_LISTENER:
                 break;
