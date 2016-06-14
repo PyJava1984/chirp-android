@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Arash Payan (https://arashpayan.com) on 6/1/16.
+ * An object that represents a Chirp service on the network.
  */
 public class Service {
 
@@ -24,22 +24,42 @@ public class Service {
         publisherId = pubId;
     }
 
+    /**
+     * Returns the IPv4 address of the host running the service.
+     * @return the IPv4 address, or <code>null</code> if an IPv4 address has not been discovered yet
+     */
     public String getIpv4() {
         return v4Ip;
     }
 
+    /**
+     * Returns the IPv6 address of the host running the service.
+     * @return the IPv6 address, or <code>null</code> if an IPv6 address has not been discovered yet
+     */
     public String getIpv6() {
         return v6Ip;
     }
 
+    /**
+     * Returns the name of the service
+     * @return
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the payload of the service. <code>null</code> if the service does not have a payload
+     * @return
+     */
     public Map<String, Object> getPayload() {
         return new HashMap<>(payload);
     }
 
+    /**
+     * A unique identifier for the publisher responsible for publishing this service.
+     * @return
+     */
     public String getPublisherId() {
         return publisherId;
     }

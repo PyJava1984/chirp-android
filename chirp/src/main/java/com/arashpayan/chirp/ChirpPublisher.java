@@ -16,7 +16,29 @@ import static com.arashpayan.chirp.ChirpLog.logi;
 import static com.arashpayan.chirp.ChirpLog.logw;
 
 /**
- * Created by Arash Payan (https://arashpayan.com) on 6/3/16.
+ * A <code>ChirpPublisher</code> is used to publish a Chirp service on the local network. You can
+ * construct and start the publisher manually, or use the simpler class builder, like so:
+ * <code>
+ *     ChirpPublisher publisher = Chirp.publish("com.example.service").start()
+ * </code>
+ *
+ * Optionally, you can also set a payload for the publisher that gets sent along to clients
+ * listening for your service. The payload can contain any data you want that can be serialized
+ * into a JSON object, as long as it's less than <code>Chirp.MAX_PAYLOAD_BYTES</code> (32KB) in size
+ * (after serialization). For example, if you're using to mDNS/Bonjour, you might want to include a
+ * port number for your service in the payload:
+ * <code>
+ *     Map<String, Object> payload = new HashMap<>();
+ *     payload.put("port", 1337);
+ *     ChirpPublisher publisher Chirp.publish("com.example.service").
+ *                                    payload(payload).
+ *                                    start();
+ * </code>
+ *
+ * When you no longer want your service published:
+ * <code>
+ *     publisher.stop();
+ * </code>
  */
 public class ChirpPublisher {
 
@@ -29,7 +51,7 @@ public class ChirpPublisher {
     private WifiManager.MulticastLock mMulticastLock;
     private ExecutorService mExecutor;
 
-    public class Command {
+    protected class Command {
         String type;
         Message message;
     }
@@ -42,18 +64,35 @@ public class ChirpPublisher {
             mPublisher = new ChirpPublisher(serviceName);
         }
 
+        /**
+         * Sets a payload with arbitrary data to be associated with the service
+         * @param p the payload
+         * @return the <code>Builder</code> object for method chaining
+         */
         @SuppressWarnings("unused")
         public Builder payload(Map<String, Object> p) {
             mPublisher.setPayload(p);
             return this;
         }
 
+        /**
+         * Sets the TTL of the service. There's not really a good reason to set this, unless you're
+         * debugging the library or implementing Chirp in another language and need to test with this.
+         * @param ttl the ttl to use for the service
+         * @return the same <code>Builder</code> object for method chaining
+         */
         @SuppressWarnings("unused")
         public Builder ttl(int ttl) {
             mPublisher.setTtl(ttl);
             return this;
         }
 
+        /**
+         * Starts the publisher and returns it
+         * @param app the <code>Application</code> object is used instead of a <code>Context</code>
+         *            to make sure an <code>Activity</code>, which could leak, isn't passed in
+         * @return the newly created and started <code>ChirpPublisher</code>
+         */
         public ChirpPublisher start(Application app) {
             mPublisher.start(app);
             return mPublisher;
@@ -61,6 +100,12 @@ public class ChirpPublisher {
 
     }
 
+    /**
+     * Create a publisher that can publish the specified service name. It's always easier to use
+     * <code>Chirp.publish(String)</code> to create, configure and start a <code>ChirpPublisher</code>
+     * instead of using this constructor.
+     * @param serviceName a valid service name
+     */
     public ChirpPublisher(@NonNull String serviceName) {
         if (!Chirp.isValidServiceName(serviceName)) {
             throw new IllegalArgumentException("Invalid service name");
@@ -71,7 +116,17 @@ public class ChirpPublisher {
         mTtl = 60;
     }
 
+    /**
+     * Sets the payload for this service. If the payload is too large (> Chirp.MAX_PAYLOAD_BYTES
+     * after serialization into JSON), then an <code>IllegalArgumentException</code> will be thrown.
+     * This method has no effect if called after the publisher has been started.
+     * @param p the payload
+     */
     public void setPayload(Map<String, Object> p) {
+        if (mIsStarted) {
+            return;
+        }
+
         if (p != null) {
             // we gotta check its size when serialized
             String json = Chirp.sGson.toJson(p);
@@ -84,6 +139,10 @@ public class ChirpPublisher {
         mPayload = p;
     }
 
+    /**
+     * Sets the ttl of the service in seconds. Must be >= 10.
+     * @param ttl
+     */
     public void setTtl(@IntRange(from=10) int ttl) {
         if (ttl < 10) {
             throw new IllegalArgumentException("TTL must be at least 10 seconds");
@@ -195,6 +254,11 @@ public class ChirpPublisher {
 //        logi("serve thread is finishing");
     }
 
+    /**
+     * Starts the publisher.
+     * @param app the <code>Application</code> object is requested instead of a <code>Context</code>
+     *            to avoid memory leaks from an <code>Activity</code> being passed in
+     */
     public void start(Application app) {
         if (mIsStarted) {
             return;
@@ -234,6 +298,13 @@ public class ChirpPublisher {
         });
     }
 
+    /**
+     * Stops the publisher. A message is sent before closing network connections to inform any
+     * Chirp listeners that our service is no longer around, so they don't have to wait for the TTL
+     * to expire before removing our service.
+     *
+     * The <code>ChirpPublisher</code> can not be started again after it has been stopped.
+     */
     public void stop() {
         if (!mIsStarted) {
             return;

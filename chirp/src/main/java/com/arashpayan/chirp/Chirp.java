@@ -18,6 +18,10 @@ import static com.arashpayan.chirp.ChirpLog.logi;
  */
 public class Chirp {
 
+    /**
+     * The maximum size of a payload when serialized into JSON. Chirp uses gson for serializing
+     * payloads into JSON.
+     */
     public static final int MAX_PAYLOAD_BYTES = 32 * 1024;
     private static final Pattern sServiceNamePattern = Pattern.compile("[a-zA-Z0-9\\.\\-]+");
     private static final SecureRandom sSecureRandom = new SecureRandom();
@@ -29,6 +33,12 @@ public class Chirp {
     private Chirp() {
     }
 
+    /**
+     * Convenience method for creating a <code>ChirpBrowser</code>.
+     * @param serviceName the name of the service to browse/listen for. Pass in "*" if you want
+     *                    to listen for all services on the network
+     * @return a <code>ChirpBrowser.Builder</code>
+     */
     public static ChirpBrowser.Builder browseFor(@NonNull String serviceName) {
         return new ChirpBrowser.Builder(serviceName);
     }
@@ -46,6 +56,13 @@ public class Chirp {
         return new String(hexChars);
     }
 
+    /**
+     * Checks if <i>name</i> can be used as a Chirp service name. Service names must a) not be empty,
+     * b) consist of a-z, A-Z, 0-9, . (period), - (hyphen), and c) be less than 32 characters. The
+     * ideal service name is a reverse dns style string. e.g. com.example.something
+     * @param name the string to test for validity
+     * @return true if the string can be used as a Chirp service name. false otherwise.
+     */
     public static boolean isValidServiceName(String name) {
         if (TextUtils.isEmpty(name)) {
             return false;
@@ -81,6 +98,12 @@ public class Chirp {
         return true;
     }
 
+    /**
+     * Convenience method for creating a <code>ChirpPublisher</code>.
+     * @param serviceName the name of the service to publish
+     * @return a <code>Builder</code> that can be configured further or used to start and return
+     * the <code>ChirpPublisher</code>
+     */
     public static ChirpPublisher.Builder publish(@NonNull String serviceName) {
         return new ChirpPublisher.Builder(serviceName);
     }

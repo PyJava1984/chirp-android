@@ -7,7 +7,7 @@ class ChirpError {
 
     protected String mCause;
 
-    public ChirpError(String cause) {
+    protected ChirpError(String cause) {
         this.mCause = cause;
     }
 

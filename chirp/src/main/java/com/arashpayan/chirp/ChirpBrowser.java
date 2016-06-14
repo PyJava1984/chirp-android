@@ -18,7 +18,18 @@ import static com.arashpayan.chirp.ChirpLog.logi;
 import static com.arashpayan.chirp.ChirpLog.logw;
 
 /**
- * Created by arash on 5/31/16.
+ * A <code>ChirpBrowser</code> is used to listen for Chirp services on the local network. You can
+ * construct and start a browser manually, or use the simpler class builder, like so:
+ * <code>
+ *     ChirpBrowser browser = Chirp.browseFor("com.example.service").
+ *                                  listener(this).
+ *                                  start(getApplication());
+ * </code>
+ *
+ * When you no longer need to listen for service(s) you should stop the browser:
+ * <code>
+ *     browser.stop();
+ * </code>
  */
 public class ChirpBrowser {
 
@@ -44,18 +55,36 @@ public class ChirpBrowser {
             mServiceName = serviceName;
         }
 
+        /**
+         * Sets the listener that will receive callbacks from the <code>ChirpBrowser</code>
+         * @param l the listener to use for callbacks. <code>null</code> is acceptable
+         * @return the same <code>Builder</code> object for method chaining
+         */
         @SuppressWarnings("unused")
         public Builder listener(ChirpBrowserListener l) {
             mListener = l;
             return this;
         }
 
+        /**
+         * Set the <code>android.os.Handler</code> of the <code>android.os.Looper</code> to be used
+         * for callbacks to the <code>ChirpBrowserListener</code>. Default is the main looper.
+         * @param h the <code>android.os.Handler</code> to use for callbacks. <code>null</code>
+         *          means to use the default looper (main).
+         * @return the same <code>Builder</code> object for method chaining
+         */
         @SuppressWarnings("unused")
         public Builder looper(Handler h) {
             mHandler = h;
             return this;
         }
 
+        /**
+         * Builds, starts and returns the <code>ChirpBrowser</code>.
+         * @param app the <code>Application</code> object is used instead of a <code>Context</code>
+         *            to make sure an <code>Activity</code>, which could leak, isn't passed in.
+         * @return the started <code>ChirpBrowser</code>
+         */
         @SuppressWarnings("unused")
         public ChirpBrowser start(Application app) {
             ChirpBrowser cb = new ChirpBrowser(mServiceName);
@@ -67,6 +96,13 @@ public class ChirpBrowser {
 
     }
 
+    /**
+     * Creates a browser that can search for the specified service name. It's always easier to use
+     * <code>Chirp.browseFor(String)</code> to create and configure a <code>ChirpBrowser</code>
+     * instead of using the constructor.
+     * @param serviceName a valid service name, or "*" if the browser should return all services
+     *                    on the network
+     */
     public ChirpBrowser(@NonNull String serviceName) {
         if (!serviceName.equals("*") && !Chirp.isValidServiceName(serviceName)) {
             throw new IllegalArgumentException("Invalid service name");
@@ -187,6 +223,10 @@ public class ChirpBrowser {
         notifyServiceRemoved(service);
     }
 
+    /**
+     * Returns true if the browser is listening for services. False, otherwise.
+     * @return
+     */
     @SuppressWarnings("unused")
     public boolean isStarted() {
         return mIsStarted;
@@ -248,14 +288,32 @@ public class ChirpBrowser {
         }
     }
 
+    /**
+     * Sets a listener to receive callbacks.
+     * @param l a <code>ChirpBrowserListener</code> or <code>null</code>
+     */
     public void setListener(ChirpBrowserListener l) {
         mListener = l;
     }
 
+    /**
+     * Sets the <code>android.os.Handler</code> to use for callbacks. Calling this after the
+     * browser has been started has no effect.
+     * @param h the handler on which to run callbacks
+     */
     protected void setHandler(Handler h) {
+        if (mIsStarted) {
+            return;
+        }
+
         mListenerHandler = h;
     }
 
+    /**
+     * Starts listening for and reporting Chirp service(s) on the local network.
+     * @param app the <code>Application</code> object is requested instead of a <code>Context</code>
+     *            to avoid memory leaks from an <code>Activity</code> being passed in
+     */
     public void start(@NonNull Application app) {
         if (mIsStarted) {
             return;
@@ -324,6 +382,10 @@ public class ChirpBrowser {
         });
     }
 
+    /**
+     * Stops the browser from listening and reporting services. The <code>ChirpBrowser</code> can
+     * not be reused.
+     */
     public void stop() {
         if (!mIsStarted) {
             return;
