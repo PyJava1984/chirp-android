@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -76,18 +77,35 @@ public class ChirpBrowser {
         mKnownServices = new HashMap<>();
     }
 
+    private void checkForExpirations() {
+        long now = System.currentTimeMillis();
+        LinkedList<Service> toRemove = new LinkedList<>();
+        for (String pubId : mKnownServices.keySet()) {
+            Service service = mKnownServices.get(pubId);
+            if (service.expiration < now) {
+                toRemove.add(service);
+            }
+        }
+
+        for (Service service : toRemove) {
+            mKnownServices.remove(service.publisherId);
+            notifyServiceRemoved(service);
+        }
+    }
+
     private void handleMessages() throws InterruptedException {
         while (mIsStarted) {
             try {
                 Message msg = mIncomingMessages.take();
                 switch (msg.type) {
-                    case Message.QUEUE_POISON_PILL:
-                        return;
                     case Message.MESSAGE_TYPE_PUBLISH:
                         handlePublish(msg);
                         break;
                     case Message.MESSAGE_TYPE_REMOVE_SERVICE:
                         handleRemoval(msg);
+                        break;
+                    case Message.QUEUE_EXPIRATION_CHECK:
+                        checkForExpirations();
                         break;
                 }
             } catch (InterruptedException ignore) {
@@ -109,6 +127,7 @@ public class ChirpBrowser {
         long ttl = System.currentTimeMillis() + msg.ttl * 1000;
         if (service == null) {
             service = new Service(msg.senderId);
+            service.expiration = ttl;
             if (msg.isIP6()) {
                 service.v6Ip = msg.ipAddress;
                 service.v6IpExpiration = ttl;
@@ -121,6 +140,7 @@ public class ChirpBrowser {
             notifyServiceDiscovered(service);
             mKnownServices.put(service.publisherId, service);
         } else {
+            service.expiration = ttl;
             boolean updatedIp = false;
             if (msg.isIP6()) {
                 service.v6IpExpiration = ttl;
@@ -183,7 +203,6 @@ public class ChirpBrowser {
             logw("failed to send hello message", t);
         }
 
-        logi("listening...");
         while (mIsStarted) {
             Message msg = socket.read();
             if (msg == null) {
@@ -286,20 +305,41 @@ public class ChirpBrowser {
                 }
             }
         });
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Message expCheck = new Message();
+                    expCheck.type = Message.QUEUE_EXPIRATION_CHECK;
+                    while (mIsStarted) {
+                        try {
+                            Thread.sleep(10000); // 10 seconds
+                        } catch (InterruptedException ignore) {}
+                        mIncomingMessages.offer(expCheck);
+                    }
+                } catch (Throwable t) {
+                    logw("error generating expiration checks", t);
+                }
+            }
+        });
     }
 
     public void stop() {
         if (!mIsStarted) {
             return;
         }
-        logi("chirpbrowser.stop");
 
         mIsStarted = false;
         mExecutor.shutdownNow();
-        mSocket4.close();
-        mSocket4 = null;
-        mSocket6.close();
-        mSocket6 = null;
+        // check if the sockets are null, in case there was a problem creating them
+        if (mSocket4 != null) {
+            mSocket4.close();
+            mSocket4 = null;
+        }
+        if (mSocket6 != null) {
+            mSocket6.close();
+            mSocket6 = null;
+        }
         mMulticastLock.release();
         mMulticastLock = null;
         mListenerHandler = null;

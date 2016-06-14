@@ -1,6 +1,7 @@
 package com.arashpayan.chirp;
 
 import android.support.annotation.CheckResult;
+import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,7 +9,11 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.Map;
 
 import static com.arashpayan.chirp.ChirpLog.logi;
@@ -36,7 +41,23 @@ public class ChirpSocket {
         }
         mSocket = new MulticastSocket(CHIRP_PORT);
         mSocket.setReuseAddress(true);
-        mSocket.joinGroup(mGroupAddress);
+        // join the group on every interface we have
+        InetSocketAddress sockAddr = new InetSocketAddress(mGroupAddress, CHIRP_PORT);
+        Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
+        int numJoins = 0;
+        while (ifaces.hasMoreElements()) {
+            NetworkInterface ifc = ifaces.nextElement();
+            if (ifc.supportsMulticast() && !ifc.isVirtual()) {
+                try {
+                    mSocket.joinGroup(sockAddr, ifc);
+                    numJoins++;
+                } catch (SocketException ignore) {}
+            }
+        }
+        if (numJoins == 0) {
+            logi("failed to join any interfaces");
+            // TODO: https://github.com/arashpayan/chirp-android/issues/2
+        }
 
         mReadBuf = new byte[Chirp.MAX_MSG_LENGTH];
         mReadPacket = new DatagramPacket(mReadBuf, Chirp.MAX_MSG_LENGTH);

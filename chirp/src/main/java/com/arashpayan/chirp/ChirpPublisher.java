@@ -181,7 +181,6 @@ public class ChirpPublisher {
             goodbye.senderId = mId;
             goodbye.serviceName = mServiceName;
             try {
-                logi("sending goodbye");
                 socket.send(goodbye);
                 Thread.sleep(50);
             } catch (IOException ex) {

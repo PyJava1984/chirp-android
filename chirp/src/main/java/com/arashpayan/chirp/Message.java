@@ -14,13 +14,13 @@ import java.util.Map;
  */
 class Message {
 
-    @StringDef({MESSAGE_TYPE_NEW_LISTENER, MESSAGE_TYPE_PUBLISH, MESSAGE_TYPE_REMOVE_SERVICE, QUEUE_POISON_PILL})
+    @StringDef({MESSAGE_TYPE_NEW_LISTENER, MESSAGE_TYPE_PUBLISH, MESSAGE_TYPE_REMOVE_SERVICE, QUEUE_EXPIRATION_CHECK})
     @Retention(RetentionPolicy.SOURCE)
     protected @interface MessageType {}
     protected static final String MESSAGE_TYPE_NEW_LISTENER = "new_listener";
     protected static final String MESSAGE_TYPE_PUBLISH = "publish";
     protected static final String MESSAGE_TYPE_REMOVE_SERVICE = "remove_service";
-    protected static final String QUEUE_POISON_PILL = "poison_pill";
+    protected static final String QUEUE_EXPIRATION_CHECK = "queue_expiration_check";
 
     protected String ipAddress;
 
