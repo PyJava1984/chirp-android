@@ -27,6 +27,7 @@ public class ChirpSocket {
     private static final String IPv4_GROUP = "224.0.0.224";
     private static final String IPv6_GROUP = "[FF06::224]";
     private static final int CHIRP_PORT = 6464;
+    private static final int MAX_MSG_LENGTH = 33 * 1024;
 
     private InetAddress mGroupAddress;
     private MulticastSocket mSocket;
@@ -59,8 +60,8 @@ public class ChirpSocket {
             // TODO: https://github.com/arashpayan/chirp-android/issues/2
         }
 
-        mReadBuf = new byte[Chirp.MAX_MSG_LENGTH];
-        mReadPacket = new DatagramPacket(mReadBuf, Chirp.MAX_MSG_LENGTH);
+        mReadBuf = new byte[MAX_MSG_LENGTH];
+        mReadPacket = new DatagramPacket(mReadBuf, MAX_MSG_LENGTH);
     }
 
     protected void close() {

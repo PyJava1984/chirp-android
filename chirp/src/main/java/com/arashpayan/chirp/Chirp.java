@@ -18,7 +18,6 @@ import static com.arashpayan.chirp.ChirpLog.logi;
  */
 public class Chirp {
 
-    public static final int MAX_MSG_LENGTH = 33 * 1024;
     public static final int MAX_PAYLOAD_BYTES = 32 * 1024;
     private static final Pattern sServiceNamePattern = Pattern.compile("[a-zA-Z0-9\\.\\-]+");
     private static final SecureRandom sSecureRandom = new SecureRandom();
