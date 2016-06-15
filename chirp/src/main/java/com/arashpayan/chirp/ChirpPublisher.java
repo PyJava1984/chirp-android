@@ -19,7 +19,8 @@ import static com.arashpayan.chirp.ChirpLog.logw;
  * A <code>ChirpPublisher</code> is used to publish a Chirp service on the local network. You can
  * construct and start the publisher manually, or use the simpler class builder, like so:
  * <code>
- *     ChirpPublisher publisher = Chirp.publish("com.example.service").start()
+ *     ChirpPublisher publisher = Chirp.publish("com.example.service").
+ *                                      start(getApplication())
  * </code>
  *
  * Optionally, you can also set a payload for the publisher that gets sent along to clients
@@ -32,7 +33,7 @@ import static com.arashpayan.chirp.ChirpLog.logw;
  *     payload.put("port", 1337);
  *     ChirpPublisher publisher Chirp.publish("com.example.service").
  *                                    payload(payload).
- *                                    start();
+ *                                    start(getApplication());
  * </code>
  *
  * When you no longer want your service published:
