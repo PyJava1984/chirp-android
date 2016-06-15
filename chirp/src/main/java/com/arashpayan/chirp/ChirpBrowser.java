@@ -20,16 +20,16 @@ import static com.arashpayan.chirp.ChirpLog.logw;
 /**
  * A <code>ChirpBrowser</code> is used to listen for Chirp services on the local network. You can
  * construct and start a browser manually, or use the simpler class builder, like so:
- * <code>
+ * <pre>
  *     ChirpBrowser browser = Chirp.browseFor("com.example.service").
  *                                  listener(this).
  *                                  start(getApplication());
- * </code>
+ * </pre>
  *
  * When you no longer need to listen for service(s) you should stop the browser:
- * <code>
+ * <pre>
  *     browser.stop();
- * </code>
+ * </pre>
  */
 public class ChirpBrowser {
 
@@ -45,6 +45,9 @@ public class ChirpBrowser {
     private ChirpSocket mSocket6;
     private Handler mListenerHandler;
 
+    /**
+     * Used to chain configuration calls for creating a <code>ChirpBrowser</code>.
+     */
     public static class Builder {
 
         private String mServiceName;

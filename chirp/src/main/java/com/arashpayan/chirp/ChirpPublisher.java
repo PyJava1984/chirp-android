@@ -18,28 +18,28 @@ import static com.arashpayan.chirp.ChirpLog.logw;
 /**
  * A <code>ChirpPublisher</code> is used to publish a Chirp service on the local network. You can
  * construct and start the publisher manually, or use the simpler class builder, like so:
- * <code>
+ * <pre>
  *     ChirpPublisher publisher = Chirp.publish("com.example.service").
  *                                      start(getApplication())
- * </code>
+ * </pre>
  *
  * Optionally, you can also set a payload for the publisher that gets sent along to clients
  * listening for your service. The payload can contain any data you want that can be serialized
  * into a JSON object, as long as it's less than <code>Chirp.MAX_PAYLOAD_BYTES</code> (32KB) in size
  * (after serialization). For example, if you're using to mDNS/Bonjour, you might want to include a
  * port number for your service in the payload:
- * <code>
- *     Map<String, Object> payload = new HashMap<>();
+ * <pre>
+ *     Map&lt;String, Object&gt; payload = new HashMap&lt;&gt;();
  *     payload.put("port", 1337);
  *     ChirpPublisher publisher Chirp.publish("com.example.service").
  *                                    payload(payload).
  *                                    start(getApplication());
- * </code>
+ * </pre>
  *
  * When you no longer want your service published:
- * <code>
+ * <pre>
  *     publisher.stop();
- * </code>
+ * </pre>
  */
 public class ChirpPublisher {
 
@@ -57,6 +57,9 @@ public class ChirpPublisher {
         Message message;
     }
 
+    /**
+     * Used to chain configuration calls for creating a <code>ChirpPublisher</code>.
+     */
     public static class Builder {
 
         private ChirpPublisher mPublisher;

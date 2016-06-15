@@ -41,24 +41,21 @@ public class Service {
     }
 
     /**
-     * Returns the name of the service
-     * @return
+     * @return the name of the service
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Returns the payload of the service. <code>null</code> if the service does not have a payload
-     * @return
+     * @return the payload of the service. <code>null</code> if the service does not have a payload
      */
     public Map<String, Object> getPayload() {
         return new HashMap<>(payload);
     }
 
     /**
-     * A unique identifier for the publisher responsible for publishing this service.
-     * @return
+     * @return the unique identifier for the publisher responsible for publishing this service.
      */
     public String getPublisherId() {
         return publisherId;

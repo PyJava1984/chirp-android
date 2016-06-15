@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 import static com.arashpayan.chirp.ChirpLog.logi;
 
 /**
- * Created by Arash Payan (https://arashpayan.com) on 5/14/16.
+ * Start here to use this library.
  */
 public class Chirp {
 
@@ -57,9 +57,10 @@ public class Chirp {
     }
 
     /**
-     * Checks if <i>name</i> can be used as a Chirp service name. Service names must a) not be empty,
-     * b) consist of a-z, A-Z, 0-9, . (period), - (hyphen), and c) be less than 32 characters. The
-     * ideal service name is a reverse dns style string. e.g. com.example.something
+     * Checks if <i>name</i> can be used as a Chirp service name. Service names must a) not be
+     * empty, b) consist of characters from a-z, A-Z, 0-9, . (period), or - (hyphen), and c) be
+     * less than 32 characters. The ideal service name is a reverse dns style string.
+     * e.g. com.example.something
      * @param name the string to test for validity
      * @return true if the string can be used as a Chirp service name. false otherwise.
      */

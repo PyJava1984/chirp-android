@@ -3,7 +3,7 @@ package com.arashpayan.chirp;
 import android.support.annotation.NonNull;
 
 /**
- * Created by Arash Payan (https://arashpayan.com) on 6/2/16.
+ * Interface for objects to receive callbacks when services are discovered, updated and removed.
  */
 public interface ChirpBrowserListener {
 
