@@ -7,7 +7,7 @@ Chirp is a network service discovery protocol. In short, it's a simpler and more
 ## Installation with Gradle
 ```
 dependencies {
-    compile 'com.arashpayan:chirp:0.1.0'
+    compile 'com.arashpayan:chirp:0.2.0'
 }
 ```
 
