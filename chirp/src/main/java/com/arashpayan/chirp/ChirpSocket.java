@@ -80,14 +80,20 @@ public class ChirpSocket {
             return null;
         }
         if (mReadPacket.getLength() == 0) {
+            if (Chirp.Debug) {
+                logi("read: received 0 length packet");
+            }
             return null;
         }
-//        String str = null;
-//        try {
-//            str = new String(mReadBuf, 0, mReadPacket.getLength(), "utf-8");
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
+        if (Chirp.Debug) {
+            String str = null;
+            try {
+                str = new String(mReadBuf, 0, mReadPacket.getLength(), "utf-8");
+                logi(Thread.currentThread().getName() +  " read: " + str);
+            } catch (UnsupportedEncodingException e) {
+                logi("failed to convert message to string: " + e.getMessage());
+            }
+        }
         ByteArrayInputStream bais = new ByteArrayInputStream(mReadBuf, 0, mReadPacket.getLength());
         Message msg;
         try {
@@ -113,10 +119,14 @@ public class ChirpSocket {
         byte[] bytes = json.getBytes();
         DatagramPacket packet = new DatagramPacket(bytes, bytes.length, mGroupAddress, CHIRP_PORT);
         mSocket.send(packet);
+        try {Thread.sleep(20); } catch (InterruptedException ie) {logi("interrupted sleep");};
+        mSocket.send(packet);
     }
 
     protected void send(byte[] bytes) throws IOException {
         DatagramPacket packet = new DatagramPacket(bytes, bytes.length, mGroupAddress, CHIRP_PORT);
+        mSocket.send(packet);
+        try {Thread.sleep(20); } catch (InterruptedException ie) {logi("interrupted sleep");};
         mSocket.send(packet);
     }
 }

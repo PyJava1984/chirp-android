@@ -12,7 +12,7 @@ dependencies {
 ```
 
 ## Usage
-#### Listening for services:
+Listening for services:
 ```
 String serviceName = "com.example.service"; // use "*" to listen for all services
 ChirpBrowser browser = Chirp.browseFor(serviceName).
@@ -20,7 +20,7 @@ ChirpBrowser browser = Chirp.browseFor(serviceName).
                              start(getApplication());
 ```
 
-#### Publishing a service:
+Publishing a service:
 ```
 ChirpPublisher publisher = Chirp.publish("com.example.service").
                                  start(getApplication());

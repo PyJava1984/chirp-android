@@ -251,11 +251,13 @@ public class ChirpBrowser {
             if (msg == null) {
                 continue;
             }
+            if (msg.senderId.equals(mId)) {
+                continue;
+            }
             mIncomingMessages.offer(msg);
         }
 
         socket.close();
-        logi("finishing listen");
     }
 
     private void notifyServiceDiscovered(@NonNull final Service service) {
@@ -318,7 +320,11 @@ public class ChirpBrowser {
      *            to avoid memory leaks from an <code>Activity</code> being passed in
      */
     public void start(@NonNull Application app) {
+        if (Chirp.Debug) {
+            logi("ChirpBrowser.start");
+        }
         if (mIsStarted) {
+            logi("ChirpBrowser.start: already started");
             return;
         }
 
@@ -337,6 +343,7 @@ public class ChirpBrowser {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                Thread.currentThread().setName("V4Conn");
                 try {
                     mSocket4 = new ChirpSocket(false);
                     listen(mSocket4);
@@ -348,6 +355,7 @@ public class ChirpBrowser {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                Thread.currentThread().setName("V6Conn");
                 try {
                     mSocket6 = new ChirpSocket(true);
                     listen(mSocket6);
@@ -359,6 +367,7 @@ public class ChirpBrowser {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                Thread.currentThread().setName("MessageHandler");
                 try {
                     handleMessages();
                 } catch (Throwable t) {
@@ -369,6 +378,7 @@ public class ChirpBrowser {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                Thread.currentThread().setName("ExpirationTicker");
                 try {
                     Message expCheck = new Message();
                     expCheck.type = Message.QUEUE_EXPIRATION_CHECK;
@@ -390,7 +400,13 @@ public class ChirpBrowser {
      * not be reused.
      */
     public void stop() {
+        if (Chirp.Debug) {
+            logi("ChirpBrowser.stop");
+        }
         if (!mIsStarted) {
+            if (Chirp.Debug) {
+                logi("ChirpBrowser.stop already stopped");
+            }
             return;
         }
 

@@ -29,6 +29,7 @@ public class Chirp {
     protected static final Gson sGson = new GsonBuilder().
             setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).
             create();
+    public static boolean Debug = false;
 
     private Chirp() {
     }

@@ -38,24 +38,30 @@ public class MainActivity extends AppCompatActivity implements ChirpBrowserListe
             LinearLayoutManager llm = new LinearLayoutManager(this);
             recyclerView.setLayoutManager(llm);
         }
-
-        mChirpBrowser = Chirp.browseFor("*").
-                              listener(mAdapter).
-                              start(getApplication());
-
-        mChirpPublisher = Chirp.publish("com.arashpayan.chirp.demo").
-                                start(getApplication());
+        Chirp.Debug = false;
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStart() {
+        super.onStart();
+
+        mAdapter.clear();
+        mChirpBrowser = Chirp.browseFor("*").
+                listener(mAdapter).
+                start(getApplication());
+
+        mChirpPublisher = Chirp.publish("com.arashpayan.chirp.demo").
+                start(getApplication());
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
 
         if (mChirpBrowser != null) {
             mChirpBrowser.stop();
         }
         if (mChirpPublisher != null) {
-            Log.i(TAG, "onDestroy: calling publisher stop");
             mChirpPublisher.stop();
         }
     }
@@ -78,6 +84,12 @@ public class MainActivity extends AppCompatActivity implements ChirpBrowserListe
     class ServicesAdapter extends RecyclerView.Adapter<ServiceBindingHolder> implements ChirpBrowserListener {
 
         private ArrayList<Service> mDiscoveredServices = new ArrayList<>();
+
+        public void clear() {
+            int numItems = mDiscoveredServices.size();
+            mDiscoveredServices.clear();
+            notifyItemRangeRemoved(0, numItems);
+        }
 
         @Override
         public ServiceBindingHolder onCreateViewHolder(ViewGroup parent, int viewType) {
